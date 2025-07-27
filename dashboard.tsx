@@ -363,11 +363,10 @@ export default function CommunityTechDashboard() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {[
-                  { icon: Calendar, label: "Schedule Appointment", color: "text-blue-600" },
+                  { icon: Calendar, label: "Book Services", color: "text-blue-600" },
                   { icon: BookOpen, label: "Class Calendar", color: "text-green-600" },
-                  { icon: Laptop, label: "Equipment Status", color: "text-purple-600" },
-                  { icon: MessageSquare, label: "Support Chat", color: "text-orange-600" },
-                  { icon: Users, label: "Community Forum", color: "text-pink-600" },
+                  { icon: Laptop, label: "Training Space", color: "text-purple-600" },
+                  { icon: MessageSquare, label: "Support Ticket", color: "text-orange-600" },
                 ].map((action, index) => (
                   <Button
                     key={action.label}
