@@ -91,7 +91,7 @@ Referrer: ${formData.referrer}
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "noreply@communitytechnet.com",
+            from: "noreply@updates.communitytech.ai",
             to: ["services@communitytechnet.com"],
             subject: `New Project Specification - ${formData.serviceType}`,
             text: emailContent,
