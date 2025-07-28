@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function CommunityTechDashboard() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null)
@@ -198,18 +197,7 @@ export default function CommunityTechDashboard() {
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full"></span>
               </Button>
-              <div className="flex items-center space-x-2">
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=40&width=40" />
-                  <AvatarFallback>CT</AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium">Tech Innovator</p>
-                  <Badge variant="outline" className="text-xs">
-                    Individual
-                  </Badge>
-                </div>
-              </div>
+              <div></div>
             </div>
           </div>
         </div>
