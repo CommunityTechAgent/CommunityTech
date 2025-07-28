@@ -2,157 +2,335 @@
 
 import { useState } from "react"
 import {
-  ArrowLeft,
   BookOpen,
   Users,
   Award,
-  Laptop,
-  Shield,
-  Briefcase,
-  GraduationCap,
+  TrendingUp,
   Clock,
-  CheckCircle,
+  Star,
   ArrowRight,
+  Calendar,
+  DollarSign,
+  GraduationCap,
+  Shield,
+  Cloud,
+  Database,
+  Globe,
+  BarChart3,
+  Lock,
+  Wifi,
+  Trophy,
+  UserCheck,
+  Heart,
+  MessageSquare,
   Play,
-  Target,
-  Zap,
-  Building,
-  Network,
+  ExternalLink,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+// Bootcamp data that will be shared with the project specification form
+export const bootcampPrograms = [
+  {
+    id: "awsBootcamp",
+    title: "AWS Cloud Practitioner Bootcamp",
+    duration: "8-week intensive program",
+    price: 2499,
+    description: "Includes exam voucher & practice tests",
+    icon: Cloud,
+    level: "Beginner to Intermediate",
+    format: ["Full-time", "Part-time", "Weekend"],
+    certification: "AWS Cloud Practitioner",
+    skills: ["AWS Core Services", "Cloud Architecture", "Security", "Pricing"],
+    jobRoles: ["Cloud Support", "Solutions Architect", "DevOps Engineer"],
+    salaryRange: "$65,000 - $120,000",
+    nextCohort: "March 15, 2024",
+    spotsLeft: 8,
+    rating: 4.9,
+    students: 1247,
+  },
+  {
+    id: "securityBootcamp",
+    title: "CompTIA Security+ Bootcamp",
+    duration: "10-week comprehensive program",
+    price: 2999,
+    description: "Hands-on labs & certification prep",
+    icon: Shield,
+    level: "Beginner to Intermediate",
+    format: ["Full-time", "Part-time", "Evening"],
+    certification: "CompTIA Security+",
+    skills: ["Network Security", "Risk Management", "Cryptography", "Incident Response"],
+    jobRoles: ["Security Analyst", "IT Security Specialist", "Cybersecurity Consultant"],
+    salaryRange: "$55,000 - $95,000",
+    nextCohort: "March 22, 2024",
+    spotsLeft: 12,
+    rating: 4.8,
+    students: 892,
+  },
+  {
+    id: "salesforceBootcamp",
+    title: "Salesforce Administrator Bootcamp",
+    duration: "12-week program with real projects",
+    price: 3499,
+    description: "Trailhead integration & job placement",
+    icon: Database,
+    level: "Beginner",
+    format: ["Full-time", "Part-time", "Self-paced"],
+    certification: "Salesforce Administrator",
+    skills: ["CRM Management", "Workflow Automation", "Data Management", "Reporting"],
+    jobRoles: ["Salesforce Admin", "CRM Specialist", "Business Analyst"],
+    salaryRange: "$60,000 - $100,000",
+    nextCohort: "April 1, 2024",
+    spotsLeft: 15,
+    rating: 4.7,
+    students: 634,
+  },
+  {
+    id: "googleCloudBootcamp",
+    title: "Google Cloud Professional Bootcamp",
+    duration: "10-week cloud architecture program",
+    price: 3299,
+    description: "GCP credits & certification vouchers",
+    icon: Globe,
+    level: "Intermediate",
+    format: ["Full-time", "Part-time", "Weekend"],
+    certification: "Google Cloud Professional",
+    skills: ["GCP Services", "Kubernetes", "Data Analytics", "Machine Learning"],
+    jobRoles: ["Cloud Engineer", "Data Engineer", "DevOps Specialist"],
+    salaryRange: "$70,000 - $130,000",
+    nextCohort: "March 29, 2024",
+    spotsLeft: 6,
+    rating: 4.9,
+    students: 523,
+  },
+  {
+    id: "azureBootcamp",
+    title: "Microsoft Azure Fundamentals Bootcamp",
+    duration: "8-week Azure essentials program",
+    price: 2799,
+    description: "Azure sandbox & certification prep",
+    icon: Cloud,
+    level: "Beginner to Intermediate",
+    format: ["Full-time", "Part-time", "Evening"],
+    certification: "Microsoft Azure Fundamentals",
+    skills: ["Azure Services", "Virtual Machines", "Storage", "Networking"],
+    jobRoles: ["Azure Administrator", "Cloud Support", "Systems Engineer"],
+    salaryRange: "$58,000 - $110,000",
+    nextCohort: "April 5, 2024",
+    spotsLeft: 10,
+    rating: 4.6,
+    students: 789,
+  },
+  {
+    id: "ciscoBootcamp",
+    title: "Cisco CCNA Bootcamp",
+    duration: "14-week networking intensive",
+    price: 3999,
+    description: "Lab equipment & practice exams",
+    icon: Wifi,
+    level: "Intermediate",
+    format: ["Full-time", "Part-time", "Weekend"],
+    certification: "Cisco CCNA",
+    skills: ["Network Configuration", "Routing & Switching", "Network Security", "Troubleshooting"],
+    jobRoles: ["Network Engineer", "Network Administrator", "IT Support Specialist"],
+    salaryRange: "$50,000 - $85,000",
+    nextCohort: "April 12, 2024",
+    spotsLeft: 5,
+    rating: 4.8,
+    students: 445,
+  },
+  {
+    id: "dataAnalyticsBootcamp",
+    title: "Data Analytics Bootcamp",
+    duration: "16-week comprehensive program",
+    price: 4499,
+    description: "Python, SQL, Tableau & portfolio projects",
+    icon: BarChart3,
+    level: "Beginner to Advanced",
+    format: ["Full-time", "Part-time", "Self-paced"],
+    certification: "Data Analytics Certificate",
+    skills: ["Python", "SQL", "Tableau", "Statistics", "Machine Learning"],
+    jobRoles: ["Data Analyst", "Business Intelligence Analyst", "Data Scientist"],
+    salaryRange: "$65,000 - $120,000",
+    nextCohort: "March 25, 2024",
+    spotsLeft: 18,
+    rating: 4.9,
+    students: 756,
+  },
+  {
+    id: "cybersecurityBootcamp",
+    title: "Cybersecurity Specialist Bootcamp",
+    duration: "20-week intensive program",
+    price: 5999,
+    description: "Multiple certifications & job guarantee",
+    icon: Lock,
+    level: "Intermediate to Advanced",
+    format: ["Full-time", "Part-time", "Evening"],
+    certification: "Multiple Security Certifications",
+    skills: ["Ethical Hacking", "Penetration Testing", "Incident Response", "Forensics"],
+    jobRoles: ["Cybersecurity Analyst", "Penetration Tester", "Security Consultant"],
+    salaryRange: "$75,000 - $150,000",
+    nextCohort: "April 8, 2024",
+    spotsLeft: 7,
+    rating: 4.9,
+    students: 312,
+  },
+]
+
+// Additional certifications data
+export const additionalCertifications = [
+  {
+    id: "comptiaA",
+    title: "CompTIA A+",
+    price: 799,
+    duration: "4 weeks",
+    description: "Hardware and software fundamentals",
+  },
+  {
+    id: "comptiaNetwork",
+    title: "CompTIA Network+",
+    price: 899,
+    duration: "6 weeks",
+    description: "Networking concepts and protocols",
+  },
+  {
+    id: "awsSolutions",
+    title: "AWS Solutions Architect",
+    price: 1299,
+    duration: "8 weeks",
+    description: "Advanced AWS architecture",
+  },
+  {
+    id: "azureAdmin",
+    title: "Azure Administrator",
+    price: 1199,
+    duration: "6 weeks",
+    description: "Azure administration and management",
+  },
+  {
+    id: "googleCloudArch",
+    title: "Google Cloud Architect",
+    price: 1399,
+    duration: "8 weeks",
+    description: "GCP architecture and design",
+  },
+  {
+    id: "ciscoSecurity",
+    title: "Cisco CyberOps",
+    price: 1599,
+    duration: "10 weeks",
+    description: "Cisco security operations",
+  },
+]
 
 export default function EducationPage() {
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null)
-
-  const coreFeatures = [
-    {
-      id: "multi-modal",
-      title: "Multi-Modal Training Delivery",
-      description: "Hybrid in-person/online programs with hands-on lab components",
-      icon: Laptop,
-      gradient: "from-blue-600 via-blue-500 to-cyan-400",
-      features: ["In-Person Labs", "Online Flexibility", "Hands-On Practice", "Expert Instruction"],
-    },
-    {
-      id: "testing-center",
-      title: "Authorized Testing Center",
-      description: "Secure facilities for Pearson, Kryterion, Certiport, Scantron certifications",
-      icon: Shield,
-      gradient: "from-green-600 via-emerald-500 to-teal-400",
-      features: ["Pearson VUE", "Kryterion", "Certiport", "Scantron"],
-    },
-    {
-      id: "bootcamps",
-      title: "Certification Bootcamps",
-      description: "Intensive programs in AI, app development, AWS, Salesforce, Security+, Adobe Creative Suite",
-      icon: Zap,
-      gradient: "from-orange-600 via-orange-500 to-yellow-400",
-      features: ["AI & Machine Learning", "App Development", "AWS Cloud", "Salesforce", "Security+", "Adobe Creative"],
-      priceRange: "$500-$3,500",
-    },
-    {
-      id: "exam-prep",
-      title: "Community-Led Exam Prep",
-      description: "Study groups led by local certified professionals",
-      icon: Users,
-      gradient: "from-purple-600 via-purple-500 to-pink-400",
-      features: ["Expert-Led Groups", "Peer Learning", "Practice Exams", "Study Materials"],
-      price: "$99/30-day sessions",
-    },
-    {
-      id: "digital-literacy",
-      title: "Free Digital Literacy Programs",
-      description: "Community classes bridging the digital divide",
-      icon: BookOpen,
-      gradient: "from-rose-600 via-pink-500 to-red-400",
-      features: ["Basic Computer Skills", "Internet Safety", "Digital Communication", "Online Resources"],
-      price: "FREE",
-    },
-    {
-      id: "workforce-dev",
-      title: "Workforce Development Partnerships",
-      description: "Industry-specific training with employment placement guarantees",
-      icon: Briefcase,
-      gradient: "from-indigo-600 via-indigo-500 to-blue-400",
-      features: ["Industry Training", "Job Placement", "Career Counseling", "Skills Assessment"],
-    },
-    {
-      id: "mentorship",
-      title: "Mentorship & Networking Programs",
-      description: "Alumni networks and industry professional connections",
-      icon: Network,
-      gradient: "from-cyan-600 via-cyan-500 to-blue-400",
-      features: ["Alumni Network", "Industry Mentors", "Professional Events", "Career Guidance"],
-    },
-    {
-      id: "internships",
-      title: "Internship Placement Services",
-      description: "Real-world experience opportunities with local businesses",
-      icon: Building,
-      gradient: "from-amber-600 via-yellow-500 to-orange-400",
-      features: ["Local Partnerships", "Real Experience", "Skill Development", "Career Pathways"],
-    },
-  ]
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedLevel, setSelectedLevel] = useState("all")
 
   const stats = [
-    { label: "Success Rate", value: "85%", icon: Target },
-    { label: "Certifications Monthly", value: "200+", icon: Award },
-    { label: "Industry Partners", value: "50+", icon: Building },
-    { label: "Alumni Network", value: "1,000+", icon: Users },
+    { label: "Active Students", value: "2,847", icon: Users, color: "text-blue-600" },
+    { label: "Courses Available", value: "156", icon: BookOpen, color: "text-green-600" },
+    { label: "Certifications Earned", value: "1,234", icon: Award, color: "text-purple-600" },
+    { label: "Job Placement Rate", value: "94%", icon: TrendingUp, color: "text-orange-600" },
   ]
 
-  const popularPrograms = [
+  const upcomingCourses = [
     {
-      title: "AWS Cloud Practitioner Bootcamp",
-      duration: "4 weeks",
-      price: "$1,200",
-      level: "Beginner",
-      nextStart: "Sept 15, 2025",
-      spots: "8 spots left",
+      title: "Advanced React Development",
+      instructor: "Sarah Chen",
+      date: "March 15, 2024",
+      time: "2:00 PM EST",
+      duration: "2 hours",
+      level: "Advanced",
+      spots: 12,
     },
     {
-      title: "CompTIA Security+ Intensive",
-      duration: "6 weeks",
-      price: "$1,800",
+      title: "AWS Security Best Practices",
+      instructor: "Marcus Johnson",
+      date: "March 18, 2024",
+      time: "10:00 AM EST",
+      duration: "3 hours",
       level: "Intermediate",
-      nextStart: "Sept 22, 2025",
-      spots: "12 spots left",
+      spots: 8,
     },
     {
-      title: "Salesforce Admin Certification",
-      duration: "8 weeks",
-      price: "$2,200",
-      level: "",
-      nextStart: "Oct 1, 2025",
-      spots: "15 spots left",
-    },
-    {
-      title: "App Development",
-      duration: "3 days",
-      price: "Free",
+      title: "Data Visualization with Tableau",
+      instructor: "David Rodriguez",
+      date: "March 20, 2024",
+      time: "1:00 PM EST",
+      duration: "2.5 hours",
       level: "Beginner",
-      nextStart: "Aug 5, 2025",
-      spots: "10 spots left",
-    },
-    {
-      title: "Digital Literacy",
-      duration: "1 week",
-      price: "$69",
-      level: "Beginner",
-      nextStart: "Aug 15, 2025",
-      spots: "20 spots left",
-    },
-    {
-      title: "Ai Essentials",
-      duration: "1 day",
-      price: "$125",
-      level: "Beginner",
-      nextStart: "Aug 31 , 2025",
-      spots: "6 spots left",
+      spots: 15,
     },
   ]
+
+  const testimonials = [
+    {
+      name: "Jennifer Martinez",
+      role: "Cloud Solutions Architect",
+      company: "TechCorp",
+      image: "/placeholder.svg?height=60&width=60",
+      rating: 5,
+      text: "The AWS bootcamp completely transformed my career. I went from help desk to cloud architect in just 6 months!",
+    },
+    {
+      name: "Michael Thompson",
+      role: "Cybersecurity Analyst",
+      company: "SecureNet",
+      image: "/placeholder.svg?height=60&width=60",
+      rating: 5,
+      text: "Outstanding instruction and hands-on labs. The Security+ bootcamp prepared me perfectly for the real world.",
+    },
+    {
+      name: "Lisa Wang",
+      role: "Data Analyst",
+      company: "DataInsights",
+      image: "/placeholder.svg?height=60&width=60",
+      rating: 5,
+      text: "The data analytics program gave me all the skills I needed. Now I'm working at my dream company!",
+    },
+  ]
+
+  const instructors = [
+    {
+      name: "Sarah Chen",
+      title: "Senior Cloud Architect",
+      specialties: ["AWS", "Azure", "DevOps"],
+      experience: "8+ years",
+      rating: 4.9,
+      students: 1247,
+      image: "/placeholder.svg?height=80&width=80",
+    },
+    {
+      name: "Marcus Johnson",
+      title: "Cybersecurity Expert",
+      specialties: ["Security+", "Ethical Hacking", "Incident Response"],
+      experience: "10+ years",
+      rating: 4.8,
+      students: 892,
+      image: "/placeholder.svg?height=80&width=80",
+    },
+    {
+      name: "David Rodriguez",
+      title: "Data Science Lead",
+      specialties: ["Python", "Machine Learning", "Analytics"],
+      experience: "7+ years",
+      rating: 4.9,
+      students: 634,
+      image: "/placeholder.svg?height=80&width=80",
+    },
+  ]
+
+  const filteredBootcamps = bootcampPrograms.filter((bootcamp) => {
+    const matchesSearch = bootcamp.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesLevel = selectedLevel === "all" || bootcamp.level.toLowerCase().includes(selectedLevel.toLowerCase())
+    return matchesSearch && matchesLevel
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -160,31 +338,23 @@ export default function EducationPage() {
       <header className="backdrop-blur-lg bg-white/80 border-b border-white/20 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => (window.location.href = "/")}
-                className="hover:bg-blue-50"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-orange-500 rounded-lg flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
-                    Education & Certification Hub
-                  </h1>
-                  <p className="text-sm text-slate-500">Premier Community-Driven Certification Center</p>
-                </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Education Services
+                </h1>
+                <p className="text-sm text-slate-500">Professional certification bootcamps & training</p>
               </div>
             </div>
-            <Button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Enroll Now
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule Consultation
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -192,167 +362,288 @@ export default function EducationPage() {
       <div className="container mx-auto px-6 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
-            <Target className="w-4 h-4 mr-2" />
-            DMV Region's Premier Certification Center
-          </div>
-          <h2 className="text-5xl font-bold text-slate-800 mb-4">
-            Transform Your Career with{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-orange-500 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold text-slate-800 mb-4">
+            Advance Your Career with{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Professional Certifications
             </span>
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-            Establish yourself as a leader in technology through our comprehensive certification programs, expert-led
-            training, and community-driven learning environment.
+            Join thousands of professionals who have transformed their careers through our intensive bootcamp programs.
+            Get certified, get hired, get ahead.
           </p>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            {stats.map((stat, index) => (
-              <Card key={stat.label} className="backdrop-blur-lg bg-white/60 border-white/30 text-center">
-                <CardContent className="p-6">
-                  <stat.icon className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                  <h3 className="text-2xl font-bold text-slate-800">{stat.value}</h3>
-                  <p className="text-sm text-slate-600">{stat.label}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3">
+              <Play className="w-5 h-5 mr-2" />
+              Browse Programs
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-purple-200 text-purple-600 hover:bg-purple-50 px-8 py-3 bg-transparent"
+            >
+              <Calendar className="w-5 h-5 mr-2" />
+              Free Consultation
+            </Button>
           </div>
         </div>
 
-        {/* Popular Programs */}
-        <div className="mb-16" id="popular-programs">
-          <h3 className="text-3xl font-bold text-slate-800 text-center mb-12">Popular Certification Bootcamps</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {popularPrograms.map((program, index) => (
-              <Card
-                key={program.title}
-                className="backdrop-blur-lg bg-white/60 border-white/30 hover:bg-white/80 transition-all duration-300 hover:shadow-xl"
-              >
-                <CardHeader>
-                  <div className="flex justify-between items-start mb-4">
-                    <Badge variant="outline" className="text-blue-600 border-blue-200">
-                      {program.level}
-                    </Badge>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-slate-800">{program.price}</p>
-                      <p className="text-sm text-slate-500">{program.duration}</p>
-                    </div>
-                  </div>
-                  <CardTitle className="text-xl font-bold text-slate-800 mb-2">{program.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center text-sm text-slate-600">
-                      <Clock className="w-4 h-4 mr-2 text-blue-500" />
-                      Next Start: {program.nextStart}
-                    </div>
-                    <div className="flex items-center text-sm text-slate-600">
-                      <Users className="w-4 h-4 mr-2 text-green-500" />
-                      {program.spots}
-                    </div>
-                  </div>
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg transition-all duration-300">
-                    <Play className="w-4 h-4 mr-2" />
-                    Enroll Now
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          {stats.map((stat, index) => (
+            <Card key={index} className="backdrop-blur-lg bg-white/60 border-white/30 text-center">
+              <CardContent className="p-6">
+                <stat.icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
+                <div className="text-3xl font-bold text-slate-800 mb-1">{stat.value}</div>
+                <div className="text-sm text-slate-600">{stat.label}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Core Features Grid */}
-        <div className="mb-16">
-          <h3 className="text-3xl font-bold text-slate-800 text-center mb-12">Comprehensive Learning Ecosystem</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {coreFeatures.map((feature) => (
-              <Card
-                key={feature.id}
-                className={`group backdrop-blur-lg bg-white/60 border-white/30 hover:bg-white/80 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] cursor-pointer overflow-hidden ${
-                  hoveredCard === feature.id ? "ring-2 ring-blue-400 ring-opacity-50" : ""
-                }`}
-                onMouseEnter={() => setHoveredCard(feature.id)}
-                onMouseLeave={() => setHoveredCard(null)}
-              >
-                <div className={`h-1 bg-gradient-to-r ${feature.gradient}`}></div>
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between mb-4">
-                    <div
-                      className={`p-3 rounded-xl bg-gradient-to-br ${feature.gradient} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <feature.icon
-                        className={`w-6 h-6 bg-gradient-to-br ${feature.gradient} bg-clip-text text-transparent`}
-                      />
-                    </div>
-                    {feature.price && (
-                      <Badge
-                        variant={feature.price === "FREE" ? "default" : "secondary"}
-                        className={feature.price === "FREE" ? "bg-green-100 text-green-700" : ""}
-                      >
-                        {feature.price}
-                      </Badge>
-                    )}
-                    {feature.priceRange && <Badge variant="secondary">{feature.priceRange}</Badge>}
-                  </div>
-                  <CardTitle className="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors mb-2">
-                    {feature.title}
-                  </CardTitle>
-                  <p className="text-slate-600 text-sm mb-4">{feature.description}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 mb-4">
-                    {feature.features.map((item, index) => (
-                      <div key={index} className="flex items-center text-xs text-slate-500">
-                        <CheckCircle className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    size="sm"
-                    className={`w-full bg-gradient-to-r ${feature.gradient} text-white hover:shadow-lg transition-all duration-300 group-hover:scale-105`}
-                  >
-                    Learn More
-                    <ArrowRight className="w-3 h-3 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center">
-          <Card className="backdrop-blur-lg bg-gradient-to-r from-blue-600/10 to-orange-500/10 border-white/30 max-w-4xl mx-auto">
-            <CardContent className="p-12">
-              <GraduationCap className="w-16 h-16 text-blue-600 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-slate-800 mb-4">Ready to Advance Your Career?</h3>
-              <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
-                Join thousands of professionals who have transformed their careers through our comprehensive
-                certification programs. Start your journey today.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 hover:shadow-xl transition-all duration-300"
-                >
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Browse All Programs
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-orange-200 text-orange-600 hover:bg-orange-50 px-8 py-3 hover:shadow-xl transition-all duration-300 bg-transparent"
-                >
-                  <Users className="w-5 h-5 mr-2" />
-                  Schedule Consultation
-                </Button>
+        {/* Search and Filters */}
+        <Card className="backdrop-blur-lg bg-white/60 border-white/30 mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <Input
+                  placeholder="Search bootcamps..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
               </div>
+              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="All Levels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Popular Certification Bootcamps */}
+        <Card className="backdrop-blur-lg bg-white/60 border-white/30 mb-12">
+          <CardHeader>
+            <CardTitle className="flex items-center text-2xl font-bold text-slate-800">
+              <Trophy className="w-6 h-6 mr-3 text-yellow-600" />
+              Popular Certification Bootcamps
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBootcamps.map((bootcamp) => (
+                <Card
+                  key={bootcamp.id}
+                  className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-2 hover:border-blue-300"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <bootcamp.icon className="w-8 h-8 text-blue-600 flex-shrink-0" />
+                      <Badge variant="secondary" className="text-xs">
+                        {bootcamp.level}
+                      </Badge>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                      {bootcamp.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 mb-3">{bootcamp.duration}</p>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-2xl font-bold text-green-600">${bootcamp.price.toLocaleString()}</div>
+                      <div className="flex items-center text-sm text-slate-500">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
+                        {bootcamp.rating}
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-4">{bootcamp.description}</p>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center text-sm text-slate-600">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Next cohort: {bootcamp.nextCohort}
+                      </div>
+                      <div className="flex items-center text-sm text-slate-600">
+                        <Users className="w-4 h-4 mr-2" />
+                        {bootcamp.spotsLeft} spots left
+                      </div>
+                      <div className="flex items-center text-sm text-slate-600">
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        {bootcamp.salaryRange}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {bootcamp.skills.slice(0, 3).map((skill, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white group-hover:shadow-lg transition-all">
+                      Enroll Now
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Upcoming Live Sessions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+                <Calendar className="w-5 h-5 mr-2 text-green-600" />
+                Upcoming Live Sessions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {upcomingCourses.map((course, index) => (
+                <div key={index} className="p-4 border rounded-lg hover:bg-white/50 transition-colors">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-slate-800">{course.title}</h4>
+                    <Badge variant="outline" className="text-xs">
+                      {course.level}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-2">Instructor: {course.instructor}</p>
+                  <div className="flex items-center text-sm text-slate-500 space-x-4">
+                    <span className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      {course.date}
+                    </span>
+                    <span className="flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
+                      {course.time}
+                    </span>
+                    <span className="flex items-center">
+                      <Users className="w-4 h-4 mr-1" />
+                      {course.spots} spots
+                    </span>
+                  </div>
+                  <Button size="sm" className="mt-3 w-full">
+                    Register Free
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+                <UserCheck className="w-5 h-5 mr-2 text-purple-600" />
+                Expert Instructors
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {instructors.map((instructor, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-white/50 transition-colors"
+                >
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage src={instructor.image || "/placeholder.svg"} />
+                    <AvatarFallback>
+                      {instructor.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-slate-800">{instructor.name}</h4>
+                    <p className="text-sm text-slate-600">{instructor.title}</p>
+                    <div className="flex items-center mt-1">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
+                      <span className="text-sm text-slate-500">{instructor.rating}</span>
+                      <span className="text-sm text-slate-400 ml-2">• {instructor.students} students</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {instructor.specialties.slice(0, 2).map((specialty, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {specialty}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
+
+        {/* Student Success Stories */}
+        <Card className="backdrop-blur-lg bg-white/60 border-white/30 mb-12">
+          <CardHeader>
+            <CardTitle className="flex items-center text-2xl font-bold text-slate-800">
+              <Heart className="w-6 h-6 mr-3 text-red-500" />
+              Student Success Stories
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimonials.map((testimonial, index) => (
+                <Card key={index} className="border-2 hover:border-blue-300 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4">
+                      <Avatar className="w-12 h-12 mr-3">
+                        <AvatarImage src={testimonial.image || "/placeholder.svg"} />
+                        <AvatarFallback>
+                          {testimonial.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-semibold text-slate-800">{testimonial.name}</h4>
+                        <p className="text-sm text-slate-600">{testimonial.role}</p>
+                        <p className="text-xs text-slate-500">{testimonial.company}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center mb-3">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-slate-600 italic">"{testimonial.text}"</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Call to Action */}
+        <Card className="backdrop-blur-lg bg-gradient-to-r from-blue-600 to-purple-600 border-0 text-white">
+          <CardContent className="p-12 text-center">
+            <h3 className="text-3xl font-bold mb-4">Ready to Transform Your Career?</h3>
+            <p className="text-xl mb-8 opacity-90">
+              Join thousands of professionals who have advanced their careers through our certification programs.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3">
+                <ExternalLink className="w-5 h-5 mr-2" />
+                View All Programs
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white/10 px-8 py-3 bg-transparent"
+              >
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Talk to Advisor
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

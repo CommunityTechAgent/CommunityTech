@@ -13,6 +13,13 @@ import {
   Video,
   GraduationCap,
   Plus,
+  Cloud,
+  Shield,
+  Database,
+  Globe,
+  BarChart3,
+  Lock,
+  Wifi,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +32,144 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
+
+// Bootcamp data synchronized with education page
+const bootcampPrograms = [
+  {
+    id: "awsBootcamp",
+    title: "AWS Cloud Practitioner Bootcamp",
+    duration: "8-week intensive program",
+    price: 2499,
+    description: "Includes exam voucher & practice tests",
+    icon: Cloud,
+    level: "Beginner to Intermediate",
+    rating: 4.9,
+    students: 1247,
+  },
+  {
+    id: "securityBootcamp",
+    title: "CompTIA Security+ Bootcamp",
+    duration: "10-week comprehensive program",
+    price: 2999,
+    description: "Hands-on labs & certification prep",
+    icon: Shield,
+    level: "Beginner to Intermediate",
+    rating: 4.8,
+    students: 892,
+  },
+  {
+    id: "salesforceBootcamp",
+    title: "Salesforce Administrator Bootcamp",
+    duration: "12-week program with real projects",
+    price: 3499,
+    description: "Trailhead integration & job placement",
+    icon: Database,
+    level: "Beginner",
+    rating: 4.7,
+    students: 634,
+  },
+  {
+    id: "googleCloudBootcamp",
+    title: "Google Cloud Professional Bootcamp",
+    duration: "10-week cloud architecture program",
+    price: 3299,
+    description: "GCP credits & certification vouchers",
+    icon: Globe,
+    level: "Intermediate",
+    rating: 4.9,
+    students: 523,
+  },
+  {
+    id: "azureBootcamp",
+    title: "Microsoft Azure Fundamentals Bootcamp",
+    duration: "8-week Azure essentials program",
+    price: 2799,
+    description: "Azure sandbox & certification prep",
+    icon: Cloud,
+    level: "Beginner to Intermediate",
+    rating: 4.6,
+    students: 789,
+  },
+  {
+    id: "ciscoBootcamp",
+    title: "Cisco CCNA Bootcamp",
+    duration: "14-week networking intensive",
+    price: 3999,
+    description: "Lab equipment & practice exams",
+    icon: Wifi,
+    level: "Intermediate",
+    rating: 4.8,
+    students: 445,
+  },
+  {
+    id: "dataAnalyticsBootcamp",
+    title: "Data Analytics Bootcamp",
+    duration: "16-week comprehensive program",
+    price: 4499,
+    description: "Python, SQL, Tableau & portfolio projects",
+    icon: BarChart3,
+    level: "Beginner to Advanced",
+    rating: 4.9,
+    students: 756,
+  },
+  {
+    id: "cybersecurityBootcamp",
+    title: "Cybersecurity Specialist Bootcamp",
+    duration: "20-week intensive program",
+    price: 5999,
+    description: "Multiple certifications & job guarantee",
+    icon: Lock,
+    level: "Intermediate to Advanced",
+    rating: 4.9,
+    students: 312,
+  },
+]
+
+// Additional certifications data synchronized with education page
+const additionalCertifications = [
+  {
+    id: "comptiaA",
+    title: "CompTIA A+",
+    price: 799,
+    duration: "4 weeks",
+    description: "Hardware and software fundamentals",
+  },
+  {
+    id: "comptiaNetwork",
+    title: "CompTIA Network+",
+    price: 899,
+    duration: "6 weeks",
+    description: "Networking concepts and protocols",
+  },
+  {
+    id: "awsSolutions",
+    title: "AWS Solutions Architect",
+    price: 1299,
+    duration: "8 weeks",
+    description: "Advanced AWS architecture",
+  },
+  {
+    id: "azureAdmin",
+    title: "Azure Administrator",
+    price: 1199,
+    duration: "6 weeks",
+    description: "Azure administration and management",
+  },
+  {
+    id: "googleCloudArch",
+    title: "Google Cloud Architect",
+    price: 1399,
+    duration: "8 weeks",
+    description: "GCP architecture and design",
+  },
+  {
+    id: "ciscoSecurity",
+    title: "Cisco CyberOps",
+    price: 1599,
+    duration: "10 weeks",
+    description: "Cisco security operations",
+  },
+]
 
 export default function ProjectSpecificationForm() {
   const [selectedService, setSelectedService] = useState<string>("")
@@ -40,6 +185,16 @@ export default function ProjectSpecificationForm() {
   const [developmentServices, setDevelopmentServices] = useState<string[]>([])
   const [developmentAddOns, setDevelopmentAddOns] = useState<string[]>([])
   const [timeline, setTimeline] = useState<string>("")
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+
+  // Education form specific state
+  const [selectedBootcamps, setSelectedBootcamps] = useState<string[]>([])
+  const [bootcampFormat, setBootcampFormat] = useState<string>("")
+  const [selectedAdditionalCerts, setSelectedAdditionalCerts] = useState<string[]>([])
+  const [tutoringSessions, setTutoringSessions] = useState<string>("")
+  const [studyMaterials, setStudyMaterials] = useState<string>("")
+  const [careerServices, setCareerServices] = useState<string[]>([])
+  const [paymentOption, setPaymentOption] = useState<string>("")
 
   const [userInfo, setUserInfo] = useState({
     firstName: "",
@@ -156,6 +311,25 @@ export default function ProjectSpecificationForm() {
 
   const handleDevelopmentAddOnToggle = (addOnId: string) => {
     setDevelopmentAddOns((prev) => (prev.includes(addOnId) ? prev.filter((id) => id !== addOnId) : [...prev, addOnId]))
+  }
+
+  // Education form handlers
+  const handleBootcampToggle = (bootcampId: string) => {
+    setSelectedBootcamps((prev) =>
+      prev.includes(bootcampId) ? prev.filter((id) => id !== bootcampId) : [...prev, bootcampId],
+    )
+  }
+
+  const handleAdditionalCertToggle = (certId: string) => {
+    setSelectedAdditionalCerts((prev) =>
+      prev.includes(certId) ? prev.filter((id) => id !== certId) : [...prev, certId],
+    )
+  }
+
+  const handleCareerServiceToggle = (serviceId: string) => {
+    setCareerServices((prev) =>
+      prev.includes(serviceId) ? prev.filter((id) => id !== serviceId) : [...prev, serviceId],
+    )
   }
 
   const calculateTotal = () => {
@@ -285,7 +459,75 @@ export default function ProjectSpecificationForm() {
 
       basePrice += mediaAddOnTotal
     } else if (selectedService === "education") {
-      basePrice = budgetRange[0] > 0 ? budgetRange[0] : 0
+      // Calculate based on selected bootcamps
+      selectedBootcamps.forEach((bootcampId) => {
+        const bootcamp = bootcampPrograms.find((b) => b.id === bootcampId)
+        if (bootcamp) {
+          basePrice += bootcamp.price
+        }
+      })
+
+      // Add format adjustments
+      switch (bootcampFormat) {
+        case "parttime":
+          basePrice += 500
+          break
+        case "weekend":
+          basePrice += 300
+          break
+        case "selfpaced":
+          basePrice -= 500
+          break
+      }
+
+      // Add additional certifications
+      selectedAdditionalCerts.forEach((certId) => {
+        const cert = additionalCertifications.find((c) => c.id === certId)
+        if (cert) {
+          basePrice += cert.price
+        }
+      })
+
+      // Add tutoring sessions
+      const tutoringPrices = {
+        "2": 400,
+        "4": 750,
+        "8": 1400,
+        "12": 2000,
+        unlimited: 2500,
+      }
+      if (tutoringSessions && tutoringPrices[tutoringSessions as keyof typeof tutoringPrices]) {
+        basePrice += tutoringPrices[tutoringSessions as keyof typeof tutoringPrices]
+      }
+
+      // Add study materials
+      switch (studyMaterials) {
+        case "physical":
+          basePrice += 199
+          break
+        case "both":
+          basePrice += 149
+          break
+      }
+
+      // Add career services
+      const careerServicePrices = {
+        resumeReview: 299,
+        interviewPrep: 399,
+        jobPlacement: 599,
+        linkedinOptimization: 199,
+      }
+
+      careerServices.forEach((serviceId) => {
+        if (careerServicePrices[serviceId as keyof typeof careerServicePrices]) {
+          basePrice += careerServicePrices[serviceId as keyof typeof careerServicePrices]
+        }
+      })
+
+      // Apply payment discount
+      if (paymentOption === "full") {
+        basePrice *= 0.95 // 5% discount for full payment
+      }
     }
 
     const addOnTotal = selectedAddOns.reduce((total, addOnId) => {
@@ -318,6 +560,16 @@ export default function ProjectSpecificationForm() {
       developmentServices,
       developmentAddOns,
       timeline,
+
+      // Education specific data
+      selectedBootcamps,
+      bootcampFormat,
+      selectedAdditionalCerts,
+      tutoringSessions,
+      studyMaterials,
+      careerServices,
+      paymentOption,
+
       timestamp: new Date().toISOString(),
 
       // User Information
@@ -341,6 +593,35 @@ export default function ProjectSpecificationForm() {
   }
 
   const handleSubmitForm = async () => {
+    // Validate required fields
+    const errors: string[] = []
+
+    if (!userInfo.firstName.trim()) {
+      errors.push("First Name is required")
+    }
+
+    if (!userInfo.lastName.trim()) {
+      errors.push("Last Name is required")
+    }
+
+    if (!userInfo.email.trim()) {
+      errors.push("Email Address is required")
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (userInfo.email.trim() && !emailRegex.test(userInfo.email)) {
+      errors.push("Please enter a valid email address")
+    }
+
+    if (errors.length > 0) {
+      setValidationErrors(errors)
+      setSubmitError("Please fill in all required fields before submitting.")
+      return
+    }
+
+    // Clear validation errors if all fields are valid
+    setValidationErrors([])
     setIsSubmitting(true)
     setSubmitError(null)
 
@@ -1369,6 +1650,89 @@ export default function ProjectSpecificationForm() {
 
   const renderEducationForm = () => (
     <div className="space-y-8">
+      {/* Bootcamp Selection - Now using local bootcamp data with state management */}
+      <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+        <CardHeader>
+          <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+            <GraduationCap className="w-5 h-5 mr-2 text-blue-600" />
+            Popular Certification Bootcamps
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Label>Select Bootcamp Program</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              {bootcampPrograms.map((bootcamp) => (
+                <div
+                  key={bootcamp.id}
+                  className="p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-400"
+                >
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Checkbox
+                      id={bootcamp.id}
+                      checked={selectedBootcamps.includes(bootcamp.id)}
+                      onCheckedChange={() => handleBootcampToggle(bootcamp.id)}
+                    />
+                    <Label htmlFor={bootcamp.id} className="font-semibold">
+                      {bootcamp.title}
+                    </Label>
+                  </div>
+                  <div className="ml-6 space-y-1">
+                    <p className="text-sm text-slate-600">{bootcamp.duration}</p>
+                    <p className="text-sm font-semibold text-green-600">${bootcamp.price.toLocaleString()}</p>
+                    <p className="text-xs text-slate-500">{bootcamp.description}</p>
+                    <div className="flex items-center text-xs text-slate-500 mt-2">
+                      <Star className="w-3 h-3 text-yellow-400 fill-current mr-1" />
+                      {bootcamp.rating} • {bootcamp.students} students
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Bootcamp Format</Label>
+            <RadioGroup className="mt-2" value={bootcampFormat} onValueChange={setBootcampFormat}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="fulltime" id="fulltime" />
+                <Label htmlFor="fulltime">Full-time (40 hours/week)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="parttime" id="parttime" />
+                <Label htmlFor="parttime">Part-time (20 hours/week) - +$500</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="weekend" id="weekend" />
+                <Label htmlFor="weekend">Weekend Only - +$300</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="selfpaced" id="selfpaced" />
+                <Label htmlFor="selfpaced">Self-Paced Online - -$500</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
+            <Label>Additional Certifications</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              {additionalCertifications.map((cert) => (
+                <div key={cert.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={cert.id}
+                    checked={selectedAdditionalCerts.includes(cert.id)}
+                    onCheckedChange={() => handleAdditionalCertToggle(cert.id)}
+                  />
+                  <Label htmlFor={cert.id} className="text-sm">
+                    {cert.title} (+${cert.price.toLocaleString()})
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Student Information */}
       <Card className="backdrop-blur-lg bg-white/60 border-white/30">
         <CardHeader>
@@ -1383,15 +1747,15 @@ export default function ProjectSpecificationForm() {
             <RadioGroup className="mt-2">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="beginner" id="beginner" />
-                <Label htmlFor="beginner">Beginner</Label>
+                <Label htmlFor="beginner">Beginner - No prior experience</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="intermediate" id="intermediate" />
-                <Label htmlFor="intermediate">Intermediate</Label>
+                <Label htmlFor="intermediate">Intermediate - Some experience</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="advanced" id="advanced" />
-                <Label htmlFor="advanced">Advanced</Label>
+                <Label htmlFor="advanced">Advanced - Professional experience</Label>
               </div>
             </RadioGroup>
           </div>
@@ -1402,7 +1766,9 @@ export default function ProjectSpecificationForm() {
               {[
                 "Career Change",
                 "Skill Enhancement",
-                "Certification",
+                "Certification Achievement",
+                "Salary Increase",
+                "Job Security",
                 "Personal Interest",
                 "Business Growth",
                 "Team Training",
@@ -1422,11 +1788,11 @@ export default function ProjectSpecificationForm() {
             <RadioGroup className="mt-2">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="visual" id="visual" />
-                <Label htmlFor="visual">Visual Learning</Label>
+                <Label htmlFor="visual">Visual Learning (Videos, Diagrams)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="handson" id="handson" />
-                <Label htmlFor="handson">Hands-on Practice</Label>
+                <Label htmlFor="handson">Hands-on Practice (Labs, Projects)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="reading" id="reading" />
@@ -1440,24 +1806,64 @@ export default function ProjectSpecificationForm() {
           </div>
 
           <div>
-            <Label>Certification Goals</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-              {[
-                "AWS Cloud Practitioner",
-                "CompTIA Security+",
-                "Salesforce Admin",
-                "Google Cloud",
-                "Microsoft Azure",
-                "Cisco CCNA",
-              ].map((cert) => (
-                <div key={cert} className="flex items-center space-x-2">
-                  <Checkbox id={cert} />
-                  <Label htmlFor={cert} className="text-sm">
-                    {cert}
-                  </Label>
-                </div>
-              ))}
+            <Label>Time Availability</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div>
+                <Label htmlFor="hoursPerWeek" className="text-sm">
+                  Hours per week you can dedicate
+                </Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select hours" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10-15 hours</SelectItem>
+                    <SelectItem value="20">20-25 hours</SelectItem>
+                    <SelectItem value="30">30-35 hours</SelectItem>
+                    <SelectItem value="40">40+ hours (Full-time)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="preferredSchedule" className="text-sm">
+                  Preferred Schedule
+                </Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select schedule" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="morning">Morning (9 AM - 12 PM)</SelectItem>
+                    <SelectItem value="afternoon">Afternoon (1 PM - 5 PM)</SelectItem>
+                    <SelectItem value="evening">Evening (6 PM - 9 PM)</SelectItem>
+                    <SelectItem value="weekend">Weekends Only</SelectItem>
+                    <SelectItem value="flexible">Flexible</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+          </div>
+
+          <div>
+            <Label>Employment Status</Label>
+            <RadioGroup className="mt-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="employed" id="employed" />
+                <Label htmlFor="employed">Currently Employed</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="unemployed" id="unemployed" />
+                <Label htmlFor="unemployed">Unemployed/Job Seeking</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="student" id="student" />
+                <Label htmlFor="student">Student</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="freelance" id="freelance" />
+                <Label htmlFor="freelance">Freelancer/Contractor</Label>
+              </div>
+            </RadioGroup>
           </div>
         </CardContent>
       </Card>
@@ -1467,50 +1873,205 @@ export default function ProjectSpecificationForm() {
         <CardHeader>
           <CardTitle className="flex items-center text-xl font-bold text-slate-800">
             <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-            Support Needs
+            Support & Services
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
             <Label>Study Materials Format</Label>
-            <RadioGroup className="mt-2">
+            <RadioGroup className="mt-2" value={studyMaterials} onValueChange={setStudyMaterials}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="digital" id="digitalMaterials" />
-                <Label htmlFor="digitalMaterials">Digital Only</Label>
+                <Label htmlFor="digitalMaterials">Digital Only (included)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="physical" id="physical" />
-                <Label htmlFor="physical">Physical Materials</Label>
+                <Label htmlFor="physical">Physical Materials (+$199)</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="both" id="bothMaterials" />
-                <Label htmlFor="bothMaterials">Both Digital & Physical</Label>
+                <Label htmlFor="bothMaterials">Both Digital & Physical (+$149)</Label>
               </div>
             </RadioGroup>
           </div>
 
           <div>
-            <Label htmlFor="tutoringSessions">Tutoring Sessions Needed</Label>
-            <Select>
+            <Label htmlFor="tutoringSessions">1-on-1 Tutoring Sessions</Label>
+            <Select value={tutoringSessions} onValueChange={setTutoringSessions}>
               <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select number of sessions" />
+                <SelectValue placeholder="Select tutoring package" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">No tutoring needed</SelectItem>
-                <SelectItem value="2">2 sessions - $400</SelectItem>
-                <SelectItem value="4">4 sessions - $750</SelectItem>
-                <SelectItem value="8">8 sessions - $1,400</SelectItem>
-                <SelectItem value="unlimited">Unlimited - $2,000</SelectItem>
+                <SelectItem value="2">2 sessions (1 hour each) - $400</SelectItem>
+                <SelectItem value="4">4 sessions (1 hour each) - $750</SelectItem>
+                <SelectItem value="8">8 sessions (1 hour each) - $1,400</SelectItem>
+                <SelectItem value="12">12 sessions (1 hour each) - $2,000</SelectItem>
+                <SelectItem value="unlimited">Unlimited tutoring - $2,500</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="careerPlacement">Career Placement Assistance</Label>
-              <p className="text-sm text-slate-500">Resume review, interview prep, job matching</p>
+          <div>
+            <Label>Career Services</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="resumeReview">Resume Review & Optimization</Label>
+                  <p className="text-sm text-slate-500">Professional resume makeover</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-semibold">+$299</span>
+                  <Switch
+                    id="resumeReview"
+                    checked={careerServices.includes("resumeReview")}
+                    onCheckedChange={() => handleCareerServiceToggle("resumeReview")}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="interviewPrep">Interview Preparation</Label>
+                  <p className="text-sm text-slate-500">Mock interviews & coaching</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-semibold">+$399</span>
+                  <Switch
+                    id="interviewPrep"
+                    checked={careerServices.includes("interviewPrep")}
+                    onCheckedChange={() => handleCareerServiceToggle("interviewPrep")}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="jobPlacement">Job Placement Assistance</Label>
+                  <p className="text-sm text-slate-500">Job matching & application support</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-semibold">+$599</span>
+                  <Switch
+                    id="jobPlacement"
+                    checked={careerServices.includes("jobPlacement")}
+                    onCheckedChange={() => handleCareerServiceToggle("jobPlacement")}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <Label htmlFor="linkedinOptimization">LinkedIn Profile Optimization</Label>
+                  <p className="text-sm text-slate-500">Professional LinkedIn makeover</p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-semibold">+$199</span>
+                  <Switch
+                    id="linkedinOptimization"
+                    checked={careerServices.includes("linkedinOptimization")}
+                    onCheckedChange={() => handleCareerServiceToggle("linkedinOptimization")}
+                  />
+                </div>
+              </div>
             </div>
-            <Switch id="careerPlacement" />
+          </div>
+
+          <div>
+            <Label>Payment Options</Label>
+            <RadioGroup className="mt-2" value={paymentOption} onValueChange={setPaymentOption}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="full" id="fullPayment" />
+                <Label htmlFor="fullPayment">Pay in Full (5% discount)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="installments" id="installments" />
+                <Label htmlFor="installments">Monthly Installments (0% interest)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="employer" id="employer" />
+                <Label htmlFor="employer">Employer Sponsorship</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="financing" id="financing" />
+                <Label htmlFor="financing">Third-party Financing</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
+            <Label>Special Accommodations</Label>
+            <Textarea
+              placeholder="Please describe any special accommodations needed (accessibility, scheduling, etc.)"
+              className="mt-2"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Project Requirements Section */}
+      <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+        <CardHeader>
+          <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+            <FileText className="w-5 h-5 mr-2 text-blue-600" />
+            Program Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Label htmlFor="startDate">Preferred Start Date</Label>
+            <Input id="startDate" type="date" className="mt-2" />
+          </div>
+
+          <div>
+            <Label htmlFor="urgency">Timeline Preference</Label>
+            <Select>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select timeline" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asap">ASAP - Next available cohort</SelectItem>
+                <SelectItem value="month">Within 1 month</SelectItem>
+                <SelectItem value="quarter">Within 3 months</SelectItem>
+                <SelectItem value="flexible">Flexible - Best fit for schedule</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="motivation">What motivates you to pursue this certification?</Label>
+            <Textarea
+              id="motivation"
+              placeholder="Tell us about your career goals and motivation..."
+              className="mt-2 min-h-[100px]"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="experience">Relevant Experience</Label>
+            <Textarea
+              id="experience"
+              placeholder="Describe any relevant work experience, education, or projects..."
+              className="mt-2 min-h-[100px]"
+            />
+          </div>
+
+          <div>
+            <Label>Technology Access</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              {[
+                "Reliable Internet Connection",
+                "Personal Computer/Laptop",
+                "Webcam & Microphone",
+                "Quiet Study Space",
+                "Mobile Device",
+                "Cloud Platform Access",
+              ].map((tech) => (
+                <div key={tech} className="flex items-center space-x-2">
+                  <Checkbox id={tech} />
+                  <Label htmlFor={tech} className="text-sm">
+                    {tech}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -1593,6 +2154,17 @@ export default function ProjectSpecificationForm() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Validation Errors Display */}
+              {validationErrors.length > 0 && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <h4 className="text-red-800 font-semibold mb-2">Please correct the following errors:</h4>
+                  <ul className="list-disc list-inside text-red-700 text-sm space-y-1">
+                    {validationErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="firstName">First Name *</Label>
@@ -1601,7 +2173,11 @@ export default function ProjectSpecificationForm() {
                     value={userInfo.firstName}
                     onChange={(e) => setUserInfo((prev) => ({ ...prev, firstName: e.target.value }))}
                     placeholder="Enter your first name"
-                    className="mt-2"
+                    className={`mt-2 ${
+                      validationErrors.some((error) => error.includes("First Name"))
+                        ? "border-red-500 focus:border-red-500"
+                        : ""
+                    }`}
                     required
                   />
                 </div>
@@ -1612,7 +2188,11 @@ export default function ProjectSpecificationForm() {
                     value={userInfo.lastName}
                     onChange={(e) => setUserInfo((prev) => ({ ...prev, lastName: e.target.value }))}
                     placeholder="Enter your last name"
-                    className="mt-2"
+                    className={`mt-2 ${
+                      validationErrors.some((error) => error.includes("Last Name"))
+                        ? "border-red-500 focus:border-red-500"
+                        : ""
+                    }`}
                     required
                   />
                 </div>
@@ -1627,7 +2207,11 @@ export default function ProjectSpecificationForm() {
                     value={userInfo.email}
                     onChange={(e) => setUserInfo((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="your.email@example.com"
-                    className="mt-2"
+                    className={`mt-2 ${
+                      validationErrors.some((error) => error.includes("Email"))
+                        ? "border-red-500 focus:border-red-500"
+                        : ""
+                    }`}
                     required
                   />
                 </div>
@@ -1913,9 +2497,11 @@ export default function ProjectSpecificationForm() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 hover:shadow-xl transition-all duration-300"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 hover:shadow-xl transition-all duration-300 disabled:opacity-50"
                   onClick={handleSubmitForm}
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting || !userInfo.firstName.trim() || !userInfo.lastName.trim() || !userInfo.email.trim()
+                  }
                 >
                   {isSubmitting ? (
                     <>
@@ -1983,10 +2569,18 @@ export default function ProjectSpecificationForm() {
                     setSelectedAddOns([])
                     setSelectedTeamMember("")
                     setSubmitError(null)
+                    setValidationErrors([]) // Add this line
                     setMediaAddOns([])
                     setDevelopmentServices([])
                     setDevelopmentAddOns([])
                     setTimeline("")
+                    setSelectedBootcamps([])
+                    setBootcampFormat("")
+                    setSelectedAdditionalCerts([])
+                    setTutoringSessions("")
+                    setStudyMaterials("")
+                    setCareerServices([])
+                    setPaymentOption("")
                     setUserInfo({
                       firstName: "",
                       lastName: "",
