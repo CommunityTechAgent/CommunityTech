@@ -22,7 +22,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
@@ -37,6 +36,26 @@ export default function ProjectSpecificationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [mediaAddOns, setMediaAddOns] = useState<string[]>([])
+  const [developmentServices, setDevelopmentServices] = useState<string[]>([])
+  const [developmentAddOns, setDevelopmentAddOns] = useState<string[]>([])
+  const [timeline, setTimeline] = useState<string>("")
+
+  const [userInfo, setUserInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    company: "",
+    jobTitle: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "United States",
+    howDidYouHear: "",
+    communicationPreference: "email",
+  })
 
   const serviceTypes = [
     { id: "development", name: "Development Services", icon: Smartphone },
@@ -125,14 +144,146 @@ export default function ProjectSpecificationForm() {
     setSelectedAddOns((prev) => (prev.includes(addOnId) ? prev.filter((id) => id !== addOnId) : [...prev, addOnId]))
   }
 
+  const handleMediaAddOnToggle = (addOnId: string) => {
+    setMediaAddOns((prev) => (prev.includes(addOnId) ? prev.filter((id) => id !== addOnId) : [...prev, addOnId]))
+  }
+
+  const handleDevelopmentServiceToggle = (serviceId: string) => {
+    setDevelopmentServices((prev) =>
+      prev.includes(serviceId) ? prev.filter((id) => id !== serviceId) : [...prev, serviceId],
+    )
+  }
+
+  const handleDevelopmentAddOnToggle = (addOnId: string) => {
+    setDevelopmentAddOns((prev) => (prev.includes(addOnId) ? prev.filter((id) => id !== addOnId) : [...prev, addOnId]))
+  }
+
   const calculateTotal = () => {
     let basePrice = 0
 
     // Base pricing based on service type
     if (selectedService === "development") {
-      basePrice = budgetRange[0] > 0 ? budgetRange[0] : 0
+      // Calculate based on selected development services (using lowest prices)
+      const developmentServicePrices = {
+        basicWeb: 1500, // Lowest of $1,500-$3,000
+        businessWeb: 3000, // Lowest of $3,000-$5,000
+        ecommerceWeb: 3500, // Lowest of $3,500-$10,500
+        enterpriseWeb: 20000, // Lowest of $20,000+
+        basicMobile: 2500, // Lowest of $2,500-$5,500
+        advancedMobile: 5000, // Lowest of $5,000-$7,500
+        enterpriseMobile: 15000, // Lowest of $15,000+
+        basicSoftware: 10000, // Lowest of $10,000-$15,000
+        complexSoftware: 15000, // Lowest of $15,000-$100,000
+        enterpriseSoftware: 100000, // Lowest of $100,000+
+        basicApi: 1000, // Lowest of $1,000-$4,000
+        complexApi: 4000, // Lowest of $4,000-$15,000
+        enterpriseApi: 25000, // Lowest of $25,000+
+      }
+
+      developmentServices.forEach((serviceId) => {
+        if (developmentServicePrices[serviceId as keyof typeof developmentServicePrices]) {
+          basePrice += developmentServicePrices[serviceId as keyof typeof developmentServicePrices]
+        }
+      })
+
+      // Add development add-ons (using lowest prices)
+      const devAddOnPrices = {
+        devOps: 2500, // Lowest of $2,500-$7,500
+        testing: 1500, // Lowest of $1,500-$5,000
+        security: 2000, // Lowest of $2,000-$8,000
+        performance: 1000, // Lowest of $1,000-$4,000
+        monitoring: 1500, // Lowest of $1,500-$3,500
+        backup: 1000, // Lowest of $1,000-$3,000
+        basicSupport: 1500, // $500/month × 3 months
+        standardSupport: 4500, // $750/month × 6 months
+        premiumSupport: 12000, // $1,000/month × 12 months
+        enterpriseSupport: 24000, // $2,000/month × 12 months
+        userTraining: 1500, // Lowest of $1,500-$3,000
+        adminTraining: 2000, // Lowest of $2,000-$4,000
+        documentation: 1000, // Lowest of $1,000-$2,500
+        userManual: 500, // Lowest of $500-$1,500
+      }
+
+      developmentAddOns.forEach((addOnId) => {
+        if (devAddOnPrices[addOnId as keyof typeof devAddOnPrices]) {
+          basePrice += devAddOnPrices[addOnId as keyof typeof devAddOnPrices]
+        }
+      })
+
+      // Apply timeline multiplier
+      if (timeline === "rush") {
+        basePrice *= 1.25 // +25% for rush projects
+      }
     } else if (selectedService === "media") {
-      basePrice = mediaDuration * 125 // $125 per hour
+      // Get selected media service type
+      const contentTypeElement = document.querySelector('[name="contentType"]') as HTMLInputElement
+      const contentType = contentTypeElement?.value || ""
+
+      let hourlyRate = 125 // default rate
+
+      // Set rates based on service type
+      switch (contentType) {
+        case "livestream":
+          hourlyRate = 150
+          break
+        case "photography":
+        case "editing":
+        case "consultation":
+          hourlyRate = 100
+          break
+        case "studio":
+          hourlyRate = 75
+          break
+        case "podcast":
+        case "videography":
+        case "event":
+        case "custom":
+        default:
+          hourlyRate = 125
+          break
+      }
+
+      basePrice = mediaDuration * hourlyRate
+
+      // Add media service add-ons (hourly rates)
+      const mediaAddOnTotal = mediaAddOns.reduce((total, addOnId) => {
+        switch (addOnId) {
+          case "multiCamera":
+            return total + mediaDuration * 50
+          case "lighting":
+            return total + mediaDuration * 25
+          case "audio":
+            return total + mediaDuration * 30
+          case "teleprompter":
+            return total + mediaDuration * 20
+          case "greenscreen":
+            return total + mediaDuration * 35
+          case "drone":
+            return total + 100 // flat rate per session
+          case "camera4k":
+            return total + 40 // per day
+          case "microphones":
+            return total + 15 // per day
+          case "tripods":
+            return total + 10 // per day
+          case "backdrop":
+            return total + 20 // per day
+          case "colorGrading":
+            return total + mediaDuration * 50
+          case "motionGraphics":
+            return total + mediaDuration * 75
+          case "audioMixing":
+            return total + mediaDuration * 40
+          case "subtitles":
+            return total + mediaDuration * 25
+          case "thumbnails":
+            return total + 30 // flat rate per set
+          default:
+            return total
+        }
+      }, 0)
+
+      basePrice += mediaAddOnTotal
     } else if (selectedService === "education") {
       basePrice = budgetRange[0] > 0 ? budgetRange[0] : 0
     }
@@ -164,7 +315,13 @@ export default function ProjectSpecificationForm() {
       selectedTeamMember,
       mediaDuration: selectedService === "media" ? mediaDuration : null,
       budgetRange: selectedService !== "media" ? budgetRange[0] : null,
+      developmentServices,
+      developmentAddOns,
+      timeline,
       timestamp: new Date().toISOString(),
+
+      // User Information
+      userInfo,
 
       // Form field data
       projectName,
@@ -231,6 +388,422 @@ export default function ProjectSpecificationForm() {
 
   const renderDevelopmentForm = () => (
     <div className="space-y-8">
+      {/* Development Service Selection */}
+      <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+        <CardHeader>
+          <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+            <Smartphone className="w-5 h-5 mr-2 text-blue-600" />
+            Development Service Tiers
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Label>Select Development Service</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-400">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Checkbox id="webDev" />
+                  <Label htmlFor="webDev" className="font-semibold">
+                    Web Development
+                  </Label>
+                </div>
+                <div className="space-y-2 ml-6">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="basicWeb"
+                      checked={developmentServices.includes("basicWeb")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("basicWeb")}
+                    />
+                    <Label htmlFor="basicWeb" className="text-sm">
+                      Basic Website - $1,500-$3,000
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="businessWeb"
+                      checked={developmentServices.includes("businessWeb")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("businessWeb")}
+                    />
+                    <Label htmlFor="businessWeb" className="text-sm">
+                      Business Website - $3,000-$5,000
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="ecommerceWeb"
+                      checked={developmentServices.includes("ecommerceWeb")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("ecommerceWeb")}
+                    />
+                    <Label htmlFor="ecommerceWeb" className="text-sm">
+                      E-commerce Platform - $3,500-$10,500
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="enterpriseWeb"
+                      checked={developmentServices.includes("enterpriseWeb")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("enterpriseWeb")}
+                    />
+                    <Label htmlFor="enterpriseWeb" className="text-sm">
+                      Enterprise Solution - $20,000+
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-400">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Checkbox id="mobileDev" />
+                  <Label htmlFor="mobileDev" className="font-semibold">
+                    Mobile App Development
+                  </Label>
+                </div>
+                <div className="space-y-2 ml-6">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="basicMobile"
+                      checked={developmentServices.includes("basicMobile")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("basicMobile")}
+                    />
+                    <Label htmlFor="basicMobile" className="text-sm">
+                      Basic App - $2,500-$5,500
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="advancedMobile"
+                      checked={developmentServices.includes("advancedMobile")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("advancedMobile")}
+                    />
+                    <Label htmlFor="advancedMobile" className="text-sm">
+                      Advanced App - $5,000-$7,500
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="enterpriseMobile"
+                      checked={developmentServices.includes("enterpriseMobile")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("enterpriseMobile")}
+                    />
+                    <Label htmlFor="enterpriseMobile" className="text-sm">
+                      Enterprise App - $15,000+
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-400">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Checkbox id="customSoftware" />
+                  <Label htmlFor="customSoftware" className="font-semibold">
+                    Custom Software Development
+                  </Label>
+                </div>
+                <div className="space-y-2 ml-6">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="basicSoftware"
+                      checked={developmentServices.includes("basicSoftware")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("basicSoftware")}
+                    />
+                    <Label htmlFor="basicSoftware" className="text-sm">
+                      Basic Solution - $10,000-$15,000
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="complexSoftware"
+                      checked={developmentServices.includes("complexSoftware")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("complexSoftware")}
+                    />
+                    <Label htmlFor="complexSoftware" className="text-sm">
+                      Complex System - $15,000-$100,000
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="enterpriseSoftware"
+                      checked={developmentServices.includes("enterpriseSoftware")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("enterpriseSoftware")}
+                    />
+                    <Label htmlFor="enterpriseSoftware" className="text-sm">
+                      Enterprise System - $100,000+
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 border rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-400">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Checkbox id="apiDev" />
+                  <Label htmlFor="apiDev" className="font-semibold">
+                    API Development & Integration
+                  </Label>
+                </div>
+                <div className="space-y-2 ml-6">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="basicApi"
+                      checked={developmentServices.includes("basicApi")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("basicApi")}
+                    />
+                    <Label htmlFor="basicApi" className="text-sm">
+                      Basic API - $1,000-$4,000
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="complexApi"
+                      checked={developmentServices.includes("complexApi")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("complexApi")}
+                    />
+                    <Label htmlFor="complexApi" className="text-sm">
+                      Complex Integration - $4,000-$15,000
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="enterpriseApi"
+                      checked={developmentServices.includes("enterpriseApi")}
+                      onCheckedChange={() => handleDevelopmentServiceToggle("enterpriseApi")}
+                    />
+                    <Label htmlFor="enterpriseApi" className="text-sm">
+                      Enterprise API Suite - $25,000+
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Development Approach</Label>
+            <RadioGroup className="mt-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="agile" id="agile" />
+                <Label htmlFor="agile">Agile Development (Recommended)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="waterfall" id="waterfall" />
+                <Label htmlFor="waterfall">Waterfall Methodology</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hybrid" id="hybridDev" />
+                <Label htmlFor="hybridDev">Hybrid Approach</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div>
+            <Label>Technology Stack Preferences</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+              {[
+                "React/Next.js",
+                "Vue.js",
+                "Angular",
+                "Node.js",
+                "Python/Django",
+                "PHP/Laravel",
+                "Ruby on Rails",
+                ".NET",
+                "Java/Spring",
+              ].map((tech) => (
+                <div key={tech} className="flex items-center space-x-2">
+                  <Checkbox id={tech} />
+                  <Label htmlFor={tech} className="text-sm">
+                    {tech}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Project Timeline</Label>
+            <Select value={timeline} onValueChange={setTimeline}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select expected timeline" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rush">Rush (2-4 weeks) - +25% cost</SelectItem>
+                <SelectItem value="standard">Standard (1-3 months)</SelectItem>
+                <SelectItem value="extended">Extended (3-6 months)</SelectItem>
+                <SelectItem value="longterm">Long-term (6+ months)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Development Add-Ons */}
+      <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+        <CardHeader>
+          <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+            <Plus className="w-5 h-5 mr-2 text-green-600" />
+            Development Add-On Services
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Label>Professional Services</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="devOps"
+                  checked={developmentAddOns.includes("devOps")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("devOps")}
+                />
+                <Label htmlFor="devOps" className="text-sm">
+                  DevOps Setup & CI/CD (+$2,500-$7,500)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="testing"
+                  checked={developmentAddOns.includes("testing")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("testing")}
+                />
+                <Label htmlFor="testing" className="text-sm">
+                  Automated Testing Suite (+$1,500-$5,000)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="security"
+                  checked={developmentAddOns.includes("security")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("security")}
+                />
+                <Label htmlFor="security" className="text-sm">
+                  Security Audit & Hardening (+$2,000-$8,000)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="performance"
+                  checked={developmentAddOns.includes("performance")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("performance")}
+                />
+                <Label htmlFor="performance" className="text-sm">
+                  Performance Optimization (+$1,000-$4,000)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="monitoring"
+                  checked={developmentAddOns.includes("monitoring")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("monitoring")}
+                />
+                <Label htmlFor="monitoring" className="text-sm">
+                  Monitoring & Analytics Setup (+$1,500-$3,500)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="backup"
+                  checked={developmentAddOns.includes("backup")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("backup")}
+                />
+                <Label htmlFor="backup" className="text-sm">
+                  Backup & Disaster Recovery (+$1,000-$3,000)
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Maintenance & Support</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="basicSupport"
+                  checked={developmentAddOns.includes("basicSupport")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("basicSupport")}
+                />
+                <Label htmlFor="basicSupport" className="text-sm">
+                  Basic Support (3 months) - $500/month
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="standardSupport"
+                  checked={developmentAddOns.includes("standardSupport")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("standardSupport")}
+                />
+                <Label htmlFor="standardSupport" className="text-sm">
+                  Standard Support (6 months) - $750/month
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="premiumSupport"
+                  checked={developmentAddOns.includes("premiumSupport")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("premiumSupport")}
+                />
+                <Label htmlFor="premiumSupport" className="text-sm">
+                  Premium Support (12 months) - $1,000/month
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="enterpriseSupport"
+                  checked={developmentAddOns.includes("enterpriseSupport")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("enterpriseSupport")}
+                />
+                <Label htmlFor="enterpriseSupport" className="text-sm">
+                  Enterprise Support (24/7) - $2,000/month
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Training & Documentation</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="userTraining"
+                  checked={developmentAddOns.includes("userTraining")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("userTraining")}
+                />
+                <Label htmlFor="userTraining" className="text-sm">
+                  User Training Sessions (+$1,500-$3,000)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="adminTraining"
+                  checked={developmentAddOns.includes("adminTraining")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("adminTraining")}
+                />
+                <Label htmlFor="adminTraining" className="text-sm">
+                  Admin Training (+$2,000-$4,000)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="documentation"
+                  checked={developmentAddOns.includes("documentation")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("documentation")}
+                />
+                <Label htmlFor="documentation" className="text-sm">
+                  Technical Documentation (+$1,000-$2,500)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="userManual"
+                  checked={developmentAddOns.includes("userManual")}
+                  onCheckedChange={() => handleDevelopmentAddOnToggle("userManual")}
+                />
+                <Label htmlFor="userManual" className="text-sm">
+                  User Manual & Guides (+$500-$1,500)
+                </Label>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Project Requirements Section */}
       <Card className="backdrop-blur-lg bg-white/60 border-white/30">
         <CardHeader>
@@ -329,22 +902,6 @@ export default function ProjectSpecificationForm() {
               </div>
             </div>
           </div>
-
-          <div>
-            <Label>Budget Range: ${budgetRange[0] > 0 ? budgetRange[0].toLocaleString() : "0"}</Label>
-            <Slider
-              value={budgetRange}
-              onValueChange={setBudgetRange}
-              max={50000}
-              min={0}
-              step={500}
-              className="mt-2"
-            />
-            <div className="flex justify-between text-sm text-slate-500 mt-1">
-              <span>$0</span>
-              <span>$50,000+</span>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
@@ -385,6 +942,34 @@ export default function ProjectSpecificationForm() {
                 <SelectItem value="analytics">Analytics Tools</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label>Database Requirements</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+              {["PostgreSQL", "MySQL", "MongoDB", "Redis", "Firebase", "Supabase"].map((db) => (
+                <div key={db} className="flex items-center space-x-2">
+                  <Checkbox id={db} />
+                  <Label htmlFor={db} className="text-sm">
+                    {db}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>Cloud Services</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+              {["AWS", "Google Cloud", "Microsoft Azure", "Vercel", "Netlify", "DigitalOcean"].map((cloud) => (
+                <div key={cloud} className="flex items-center space-x-2">
+                  <Checkbox id={cloud} />
+                  <Label htmlFor={cloud} className="text-sm">
+                    {cloud}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -435,20 +1020,30 @@ export default function ProjectSpecificationForm() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label htmlFor="contentType">Event/Content Type</Label>
-            <Select>
+            <Label htmlFor="contentType">Media Service Type</Label>
+            <Select
+              onValueChange={(value) => {
+                // Update pricing based on service type
+                const serviceElement = document.querySelector(`[name="contentType"]`) as HTMLInputElement
+                if (serviceElement) serviceElement.value = value
+              }}
+            >
               <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select content type" />
+                <SelectValue placeholder="Select media service" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="podcast">Podcast Recording</SelectItem>
-                <SelectItem value="livestream">Live Streaming</SelectItem>
-                <SelectItem value="photography">Photography Session</SelectItem>
-                <SelectItem value="videography">Video Production</SelectItem>
-                <SelectItem value="event">Event Coverage</SelectItem>
-                <SelectItem value="custom">Custom Project</SelectItem>
+                <SelectItem value="podcast">Podcast Recording & Production - $125/hr</SelectItem>
+                <SelectItem value="livestream">Live Streaming Services - $150/hr</SelectItem>
+                <SelectItem value="photography">Photography Services - $100/hr</SelectItem>
+                <SelectItem value="videography">Video Production - $125/hr</SelectItem>
+                <SelectItem value="event">Event Coverage - $125/hr</SelectItem>
+                <SelectItem value="custom">Custom Media Projects - $125/hr</SelectItem>
+                <SelectItem value="studio">Studio Rental - $75/hr</SelectItem>
+                <SelectItem value="editing">Post-Production Editing - $100/hr</SelectItem>
+                <SelectItem value="consultation">Media Consultation - $100/hr</SelectItem>
               </SelectContent>
             </Select>
+            <input type="hidden" name="contentType" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -494,6 +1089,209 @@ export default function ProjectSpecificationForm() {
               placeholder="Any special equipment, setup, or requirements..."
               className="mt-2"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Professional Media Services */}
+      <Card className="backdrop-blur-lg bg-white/60 border-white/30">
+        <CardHeader>
+          <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+            <Star className="w-5 h-5 mr-2 text-yellow-600" />
+            Professional Media Services
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <Label>Service Add-Ons</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="multiCamera"
+                  checked={mediaAddOns.includes("multiCamera")}
+                  onCheckedChange={() => handleMediaAddOnToggle("multiCamera")}
+                />
+                <Label htmlFor="multiCamera" className="text-sm">
+                  Multi-Camera Setup (+$50/hr = +${(mediaDuration * 50).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="lighting"
+                  checked={mediaAddOns.includes("lighting")}
+                  onCheckedChange={() => handleMediaAddOnToggle("lighting")}
+                />
+                <Label htmlFor="lighting" className="text-sm">
+                  Professional Lighting (+$25/hr = +${(mediaDuration * 25).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="audio"
+                  checked={mediaAddOns.includes("audio")}
+                  onCheckedChange={() => handleMediaAddOnToggle("audio")}
+                />
+                <Label htmlFor="audio" className="text-sm">
+                  Advanced Audio Setup (+$30/hr = +${(mediaDuration * 30).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="teleprompter"
+                  checked={mediaAddOns.includes("teleprompter")}
+                  onCheckedChange={() => handleMediaAddOnToggle("teleprompter")}
+                />
+                <Label htmlFor="teleprompter" className="text-sm">
+                  Teleprompter Service (+$20/hr = +${(mediaDuration * 20).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="greenscreen"
+                  checked={mediaAddOns.includes("greenscreen")}
+                  onCheckedChange={() => handleMediaAddOnToggle("greenscreen")}
+                />
+                <Label htmlFor="greenscreen" className="text-sm">
+                  Green Screen Setup (+$35/hr = +${(mediaDuration * 35).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="drone"
+                  checked={mediaAddOns.includes("drone")}
+                  onCheckedChange={() => handleMediaAddOnToggle("drone")}
+                />
+                <Label htmlFor="drone" className="text-sm">
+                  Drone Footage (+$100/session)
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Equipment Rental</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="camera4k"
+                  checked={mediaAddOns.includes("camera4k")}
+                  onCheckedChange={() => handleMediaAddOnToggle("camera4k")}
+                />
+                <Label htmlFor="camera4k" className="text-sm">
+                  4K Camera Rental (+$40/day)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="microphones"
+                  checked={mediaAddOns.includes("microphones")}
+                  onCheckedChange={() => handleMediaAddOnToggle("microphones")}
+                />
+                <Label htmlFor="microphones" className="text-sm">
+                  Wireless Microphones (+$15/day)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="tripods"
+                  checked={mediaAddOns.includes("tripods")}
+                  onCheckedChange={() => handleMediaAddOnToggle("tripods")}
+                />
+                <Label htmlFor="tripods" className="text-sm">
+                  Professional Tripods (+$10/day)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="backdrop"
+                  checked={mediaAddOns.includes("backdrop")}
+                  onCheckedChange={() => handleMediaAddOnToggle("backdrop")}
+                />
+                <Label htmlFor="backdrop" className="text-sm">
+                  Backdrop & Stands (+$20/day)
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Post-Production Services</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="basicEdit" />
+                <Label htmlFor="basicEdit" className="text-sm">
+                  Basic Editing (included)
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="colorGrading"
+                  checked={mediaAddOns.includes("colorGrading")}
+                  onCheckedChange={() => handleMediaAddOnToggle("colorGrading")}
+                />
+                <Label htmlFor="colorGrading" className="text-sm">
+                  Color Grading (+$50/hr = +${(mediaDuration * 50).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="motionGraphics"
+                  checked={mediaAddOns.includes("motionGraphics")}
+                  onCheckedChange={() => handleMediaAddOnToggle("motionGraphics")}
+                />
+                <Label htmlFor="motionGraphics" className="text-sm">
+                  Motion Graphics (+$75/hr = +${(mediaDuration * 75).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="audioMixing"
+                  checked={mediaAddOns.includes("audioMixing")}
+                  onCheckedChange={() => handleMediaAddOnToggle("audioMixing")}
+                />
+                <Label htmlFor="audioMixing" className="text-sm">
+                  Audio Mixing & Mastering (+$40/hr = +${(mediaDuration * 40).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="subtitles"
+                  checked={mediaAddOns.includes("subtitles")}
+                  onCheckedChange={() => handleMediaAddOnToggle("subtitles")}
+                />
+                <Label htmlFor="subtitles" className="text-sm">
+                  Subtitles & Captions (+$25/hr = +${(mediaDuration * 25).toLocaleString()})
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="thumbnails"
+                  checked={mediaAddOns.includes("thumbnails")}
+                  onCheckedChange={() => handleMediaAddOnToggle("thumbnails")}
+                />
+                <Label htmlFor="thumbnails" className="text-sm">
+                  Custom Thumbnails (+$30/set)
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Label>Studio Services</Label>
+            <RadioGroup className="mt-2">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="onlocation" id="onlocation" />
+                <Label htmlFor="onlocation">On-Location Shoot (travel fees may apply)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="studio" id="studioShoot" />
+                <Label htmlFor="studioShoot">In-Studio Production ($75/hr studio rental)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hybrid" id="hybridShoot" />
+                <Label htmlFor="hybridShoot">Hybrid (Studio + Location)</Label>
+              </div>
+            </RadioGroup>
           </div>
         </CardContent>
       </Card>
@@ -785,6 +1583,201 @@ export default function ProjectSpecificationForm() {
           </CardContent>
         </Card>
 
+        {/* User Information */}
+        {selectedService && (
+          <Card className="backdrop-blur-lg bg-white/60 border-white/30 mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold text-slate-800">
+                <Users className="w-5 h-5 mr-2 text-blue-600" />
+                Contact Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    value={userInfo.firstName}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="Enter your first name"
+                    className="mt-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    value={userInfo.lastName}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Enter your last name"
+                    className="mt-2"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={userInfo.email}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, email: e.target.value }))}
+                    placeholder="your.email@example.com"
+                    className="mt-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={userInfo.phone}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, phone: e.target.value }))}
+                    placeholder="(555) 123-4567"
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="company">Company/Organization</Label>
+                  <Input
+                    id="company"
+                    value={userInfo.company}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, company: e.target.value }))}
+                    placeholder="Your company name"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Input
+                    id="jobTitle"
+                    value={userInfo.jobTitle}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, jobTitle: e.target.value }))}
+                    placeholder="Your job title"
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={userInfo.address}
+                  onChange={(e) => setUserInfo((prev) => ({ ...prev, address: e.target.value }))}
+                  placeholder="Street address"
+                  className="mt-2"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={userInfo.city}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, city: e.target.value }))}
+                    placeholder="City"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="state">State/Province</Label>
+                  <Input
+                    id="state"
+                    value={userInfo.state}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, state: e.target.value }))}
+                    placeholder="State"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                  <Input
+                    id="zipCode"
+                    value={userInfo.zipCode}
+                    onChange={(e) => setUserInfo((prev) => ({ ...prev, zipCode: e.target.value }))}
+                    placeholder="12345"
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Select
+                  value={userInfo.country}
+                  onValueChange={(value) => setUserInfo((prev) => ({ ...prev, country: value }))}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="United States">United States</SelectItem>
+                    <SelectItem value="Canada">Canada</SelectItem>
+                    <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                    <SelectItem value="Australia">Australia</SelectItem>
+                    <SelectItem value="Germany">Germany</SelectItem>
+                    <SelectItem value="France">France</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="howDidYouHear">How did you hear about us?</Label>
+                <Select
+                  value={userInfo.howDidYouHear}
+                  onValueChange={(value) => setUserInfo((prev) => ({ ...prev, howDidYouHear: value }))}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="google">Google Search</SelectItem>
+                    <SelectItem value="social">Social Media</SelectItem>
+                    <SelectItem value="referral">Referral from friend/colleague</SelectItem>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
+                    <SelectItem value="advertisement">Online Advertisement</SelectItem>
+                    <SelectItem value="event">Event/Conference</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Preferred Communication Method</Label>
+                <RadioGroup
+                  value={userInfo.communicationPreference}
+                  onValueChange={(value) => setUserInfo((prev) => ({ ...prev, communicationPreference: value }))}
+                  className="mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="email" id="commEmail" />
+                    <Label htmlFor="commEmail">Email</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="phone" id="commPhone" />
+                    <Label htmlFor="commPhone">Phone</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="both" id="commBoth" />
+                    <Label htmlFor="commBoth">Both Email & Phone</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Dynamic Form Content */}
         {selectedService === "development" && renderDevelopmentForm()}
         {selectedService === "media" && renderMediaForm()}
@@ -990,6 +1983,25 @@ export default function ProjectSpecificationForm() {
                     setSelectedAddOns([])
                     setSelectedTeamMember("")
                     setSubmitError(null)
+                    setMediaAddOns([])
+                    setDevelopmentServices([])
+                    setDevelopmentAddOns([])
+                    setTimeline("")
+                    setUserInfo({
+                      firstName: "",
+                      lastName: "",
+                      email: "",
+                      phone: "",
+                      company: "",
+                      jobTitle: "",
+                      address: "",
+                      city: "",
+                      state: "",
+                      zipCode: "",
+                      country: "United States",
+                      howDidYouHear: "",
+                      communicationPreference: "email",
+                    })
                   }}
                 >
                   Submit Another Request
